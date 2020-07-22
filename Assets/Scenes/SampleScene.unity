@@ -980,6 +980,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraDistance: 30
+  autoRotate: 1
+  rotationSpeed: 2
 --- !u!4 &1969375612
 Transform:
   m_ObjectHideFlags: 0

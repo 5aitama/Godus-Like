@@ -33,52 +33,6 @@ public static class ProceduralPlane
         }
     }
 
-    /// <summary>
-    /// Create plane.
-    /// </summary>
-    /// <param name="plane">Infos abount the plane</param>
-    /// <param name="triangles">Plane mesh triangles</param>
-    /// <param name="vertices">Plane mesh vertices</param>
-    /// <param name="allocator">Allocator for the triangle and vertex array</param>
-    public static void Create(Plane plane, out NativeArray<Triangle> triangles, out NativeArray<Vertex> vertices, Allocator allocator)
-    {
-        triangles = new NativeArray<Triangle>(plane.IndexAmount / 3, allocator, NativeArrayOptions.UninitializedMemory);
-        vertices = new NativeArray<Vertex>(plane.VertexAmount, allocator, NativeArrayOptions.UninitializedMemory);
-
-        // Offset between each vertex
-        var offset = plane.Size / (plane.Resolution - 1);
-
-        var rot = quaternion.Euler(math.radians(plane.Rot));
-        var up = new float3(0, 0, -1);
-
-        for (var i = 0; i < vertices.Length; i++)
-        {
-            // The position of the vertex inside the plane.
-            // Each axis value is in range of 0..plane.Resolution - 1
-            var vLocalPos = i.To2D(plane.Resolution);
-
-            var vWorldPos = vLocalPos * offset;
-            //var vPos = math.mul(rot, new float3(vWorldPos.x, vWorldPos.y, 0)) + plane.Pos;
-
-            //math.normalize(vPos - Center)
-            vertices[i] = new Vertex
-            {
-                pos = math.mul(rot, new float3(vWorldPos.x, vWorldPos.y, 0)) + plane.Pos,
-                norm = math.mul(rot, up),
-                col = new float4(0, 0, 0, 0),
-                uv0 = (float2)vLocalPos / (plane.Resolution - 1),
-            };
-
-            if (vLocalPos.x < plane.Resolution - 1 && vLocalPos.y < plane.Resolution - 1)
-            {
-                var tIndex = vLocalPos.To1D(plane.Resolution - 1) * 2;
-
-                triangles[tIndex] = new Triangle(i, i + plane.Resolution, i + plane.Resolution + 1);
-                triangles[tIndex + 1] = new Triangle(i, i + plane.Resolution + 1, i + 1);
-            }
-        }
-    }
-
     [BurstCompile]
     private struct PlaneJob : IJobParallelFor
     {
@@ -145,7 +99,6 @@ public static class ProceduralPlane
             {
                 pos     = vPos,
                 norm    = vDir,
-                col     = new float4(0, 0, 0, 0),
                 uv0     = (float2)vLocalPos / (Resolution - 1),
             };
 
